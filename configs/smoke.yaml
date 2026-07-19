@@ -1,0 +1,36 @@
+model:
+  fpn_dim: 32
+  roi_size: 5
+  pose_dim: 32
+  joint_dim: 32
+  pair_dim: 32
+  num_verbs: 117
+  num_objects: 80
+  num_hoi: 600
+  pose_heads: 4
+  pose_layers: 1
+  attention_heads: 4
+  detector_mode: oracle
+data:
+  image_size: [96, 96]
+  batch_size: 1
+  num_workers: 0
+losses:
+  pose_weight: 1.0
+  verb_weight: 1.0
+  reliability_weight: 0.5
+  consistency_weight: 0.2
+  sparse_weight: 0.05
+corruption:
+  joint_probability: 0.6
+  coordinate_jitter_std: 0.05
+  dropout_probability: 0.2
+optim:
+  lr: 0.001
+  weight_decay: 0.0001
+  warmup_steps: 1
+  total_steps: 5
+train:
+  seed: 13
+  output_dir: outputs/smoke
+

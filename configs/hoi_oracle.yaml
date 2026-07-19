@@ -1,0 +1,14 @@
+model:
+  fpn_dim: 64
+  detector_mode: oracle
+data:
+  hico_train_image_root: null
+  hico_train_annotation_file: null
+  image_size: [512, 512]
+  batch_size: 2
+optim:
+  lr: 0.0001
+  total_steps: 20000
+train:
+  output_dir: outputs/hoi_oracle
+

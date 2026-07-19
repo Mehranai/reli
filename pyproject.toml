@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "relipose-hoi"
+version = "0.0.1"
+description = "Compact PyTorch research implementation of ReliPose-HOI."
+requires-python = ">=3.10"
+dependencies = [
+  "torch",
+  "torchvision",
+  "Pillow",
+]
+
+[project.optional-dependencies]
+train = [
+  "PyYAML",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+markers = [
+  "integration: optional real-data integration tests",
+  "requires_coco: tests requiring local COCO files",
+  "requires_hico: tests requiring local HICO-DET files",
+]

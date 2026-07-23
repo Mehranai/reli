@@ -1,3 +1,7 @@
+import importlib.util
+from pathlib import Path
+
+import pytest
 import torch
 from torch.utils.data import DataLoader
 
@@ -82,3 +86,16 @@ def test_robust_hico_training_update_keeps_cached_visual_counts():
     assert torch.isfinite(torch.tensor(metrics["loss"]))
     assert model.backbone.forward_calls == 1
     assert model.pair.forward_calls == 1
+
+
+def test_train_script_auto_device_resolution():
+    spec = importlib.util.spec_from_file_location("train_script", Path("scripts/train.py"))
+    train_script = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    spec.loader.exec_module(train_script)
+
+    assert train_script.resolve_device("auto").type in {"cpu", "cuda"}
+    assert train_script.resolve_device("cpu").type == "cpu"
+    if not torch.cuda.is_available():
+        with pytest.raises(SystemExit, match="CUDA was requested"):
+            train_script.resolve_device("cuda")

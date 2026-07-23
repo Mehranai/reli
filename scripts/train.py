@@ -18,11 +18,24 @@ from relipose_hoi.models import build_model
 from relipose_hoi.training import make_optimizer, make_scheduler, seed_everything, train_hoi_epoch, train_pose_epoch
 
 
+def resolve_device(name: str) -> torch.device:
+    """Resolve a CLI device string, using CUDA automatically when available."""
+    if name == "auto":
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(name)
+    if device.type == "cuda" and not torch.cuda.is_available():
+        raise SystemExit(
+            "CUDA was requested, but torch.cuda.is_available() is false. "
+            "In Colab, enable Runtime -> Change runtime type -> GPU, then restart and rerun."
+        )
+    return device
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--config", required=True)
     p.add_argument("--stage", choices=["pose", "hoi_oracle", "hoi_detected", "robust", "finetune"], required=True)
-    p.add_argument("--device", default="cpu")
+    p.add_argument("--device", default="auto", help="Device to train on: auto, cpu, cuda, cuda:0, ...")
     p.add_argument("--resume")
     p.add_argument("--max-samples", type=int)
     p.add_argument("--max-steps", type=int)
@@ -30,7 +43,10 @@ def main() -> None:
     args = p.parse_args()
     cfg = load_config(args.config)
     seed_everything(cfg.train.seed)
-    device = torch.device(args.device)
+    device = resolve_device(args.device)
+    print(f"Using device: {device}")
+    if device.type == "cuda":
+        print(f"GPU: {torch.cuda.get_device_name(device.index or 0)}")
     transform = ImageTransform(cfg.data.image_size, cfg.data.image_mean, cfg.data.image_std, cfg.data.horizontal_flip_prob)
     if args.stage == "pose":
         if not cfg.data.coco_image_root or not cfg.data.coco_annotation_file:
